@@ -11,7 +11,17 @@ ELPA_DIR = \
 
 test: elpa
 	$(CASK) exec $(EMACS) -Q -batch $(LOADPATH) $(LOAD_HELPER) \
-		-l test/test-ruby.el \
+		-l test/test-ruby.el -l test/test-coffee.el \
+		-f ert-run-tests-batch-and-exit
+
+test-ruby: elpa
+	$(CASK) exec $(EMACS) -Q -batch $(LOADPATH) $(LOAD_HELPER) \
+		-l test/test-ruby.el  \
+		-f ert-run-tests-batch-and-exit
+
+test-coffee: elpa
+	$(CASK) exec $(EMACS) -Q -batch $(LOADPATH) $(LOAD_HELPER) \
+		-l test/test-coffee.el \
 		-f ert-run-tests-batch-and-exit
 
 elpa: $(ELPA_DIR)
