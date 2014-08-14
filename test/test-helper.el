@@ -22,14 +22,26 @@
 ;;; Code:
 
 (require 'splitjoin)
+(require 'ruby-mode)
+(require 'coffee-mode)
 
 (defmacro with-ruby-temp-buffer (code &rest body)
-  "Insert `code' and enable `terraform-mode'. cursor is beginning of buffer"
+  "Insert `code' and enable `ruby-mode'. cursor is beginning of buffer"
   (declare (indent 0) (debug t))
   `(with-temp-buffer
      (insert ,code)
      (goto-char (point-min))
      (ruby-mode)
+     (font-lock-fontify-buffer)
+     ,@body))
+
+(defmacro with-coffee-temp-buffer (code &rest body)
+  "Insert `code' and enable `coffee-mode'. cursor is beginning of buffer"
+  (declare (indent 0) (debug t))
+  `(with-temp-buffer
+     (insert ,code)
+     (goto-char (point-min))
+     (coffee-mode)
      (font-lock-fontify-buffer)
      ,@body))
 
