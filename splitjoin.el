@@ -3,7 +3,7 @@
 ;; Copyright (C) 2014 by Syohei YOSHIDA
 
 ;; Author: Syohei YOSHIDA <syohex@gmail.com>
-;; URL: https://github.com/syohex/
+;; URL: https://github.com/syohex/emacs-splitjoin
 ;; Version: 0.01
 
 ;; This program is free software; you can redistribute it and/or modify
@@ -29,7 +29,8 @@
 (declare-function ruby-beginning-of-block "ruby-mode")
 (declare-function ruby-end-of-block "ruby-mode")
 
-(defconst splitjoin--supported-modes '(ruby-mode))
+(defconst splitjoin--supported-modes
+  '(ruby-mode coffee-mode))
 
 (defsubst splitjoin--in-string-or-comment-p ()
   (nth 8 (syntax-ppss)))
@@ -65,11 +66,11 @@
     (back-to-indentation)
     (unless (looking-at-p "\\=\\(?:if\\|unless\\|while\\|until\\)")
       (goto-char (line-end-position))
-      (looking-back "\\(?:if\\|unless\\|while\\|until\\)\\s-+\\(.+\\)\\s-*"))))
+      (looking-back "\\(?:if\\|unless\\|while\\|until\\)\\s-+\\(.+\\)\\s-*\\="))))
 
 (defun splitjoin--postfix-condition-p (mode)
   (cl-case mode
-    (ruby-mode (splitjoin--postfix-condition-ruby-p))))
+    ((ruby-mode coffee-mode) (splitjoin--postfix-condition-ruby-p))))
 
 (defun splitjoin--retrieve-block-condition-ruby ()
   (save-excursion
@@ -103,9 +104,7 @@
       (skip-chars-forward "^ \t\r\n")
       (setq end (point))
       (delete-region start end)
-      (insert body)
-      (insert " ")
-      (insert condition)
+      (insert body " " condition)
       (indent-for-tab-command))))
 
 (defun splitjoin--to-postfix-condition (mode)
@@ -113,7 +112,7 @@
     (cl-case mode
       (ruby-mode (splitjoin--to-postfix-condition-ruby condition)))))
 
-(defun splitjoin--to-block-condition-ruby ()
+(defun splitjoin--to-block-condition-ruby (has-end)
   (save-excursion
     (goto-char (line-beginning-position))
     (back-to-indentation)
@@ -127,12 +126,15 @@
               block-start)
           (delete-region start end)
           (setq block-start (point))
-          (insert (concat condition "\n" body "\nend"))
+          (insert condition "\n" body)
+          (when has-end
+            (insert "\nend"))
           (indent-region block-start (point)))))))
 
 (defun splitjoin--to-block-condition (mode)
   (cl-case mode
-    (ruby-mode (splitjoin--to-block-condition-ruby))))
+    (ruby-mode (splitjoin--to-block-condition-ruby t))
+    (coffee-mode (splitjoin--to-block-condition-ruby nil))))
 
 ;;;###autoload
 (defun splitjoin ()
