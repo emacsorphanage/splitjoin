@@ -56,10 +56,36 @@
             (prog1 nil
               (message "This block is more than 2 lines."))))))))
 
+(defun splitjoin--block-condition-coffee-p ()
+  (goto-char (line-beginning-position))
+  (back-to-indentation)
+  (let ((block-start-re "\\=\\(?:if\\|unless\\|while\\|until\\)\\s-*.+$")
+        curindent)
+    (unless (looking-at-p block-start-re)
+      (setq curindent (current-indentation))
+      (forward-line -1)
+      (back-to-indentation))
+    (let ((block-indent (current-indentation)))
+      (when (and (looking-at-p block-start-re)
+                 (or (not curindent) (< block-indent curindent)))
+        (let ((lines 0)
+              finish)
+          (while (not finish)
+            (forward-line 1)
+            (let ((indent (current-indentation))
+                  (line (splitjoin--current-line)))
+              (when (and (< block-indent indent)
+                         (not (string-match-p "\\`\\s-*\\'" line)))
+                (cl-incf lines))
+              (when (or (eobp) (>= block-indent (current-indentation)))
+                (setq finish t))))
+          (= lines 1))))))
+
 (defun splitjoin--block-condition-p (mode)
   (save-excursion
     (cl-case mode
-      (ruby-mode (splitjoin--block-condition-ruby-p)))))
+      (ruby-mode (splitjoin--block-condition-ruby-p))
+      (coffee-mode (splitjoin--block-condition-coffee-p)))))
 
 (defun splitjoin--postfix-condition-ruby-p ()
   (save-excursion
