@@ -127,10 +127,7 @@
 
 (defun splitjoin--end-of-block (mode)
   (cl-case mode
-    (ruby-mode (ruby-end-of-block))
-    (coffee-mode
-     (forward-line -1)
-     (back-to-indentation))))
+    (ruby-mode (ruby-end-of-block))))
 
 (defun splitjoin--indent-postfix (mode &optional indent)
   (cl-case mode
@@ -163,29 +160,54 @@
       ((ruby-mode coffee-mode)
        (splitjoin--to-postfix-condition-common mode condition)))))
 
-(defun splitjoin--to-block-condition-ruby (has-end)
+(defsubst splitjoin--opening-block (close-type)
+  (cl-case close-type
+    (brace "{") ;; XXX Fix when perl is supported
+    (otherwise "")))
+
+(defsubst splitjoin--closing-block (close-type)
+  (cl-case close-type
+    (brace "}")
+    (end "end")))
+
+(defun splitjoin--indent-block (mode start end &optional block-indent)
+  (cl-case mode
+    (ruby-mode
+     (indent-region start end))
+    (coffee-mode
+     (goto-char start)
+     (indent-to block-indent)
+     (goto-char end)
+     (back-to-indentation)
+     (indent-to block-indent)
+     (coffee-indent-line))))
+
+(defun splitjoin--to-block-condition-common (mode close-type)
   (save-excursion
     (goto-char (line-beginning-position))
     (back-to-indentation)
     (let ((start (point))
           (end (line-end-position))
+          (curindent (current-indentation))
           (regexp "\\=\\(.+\\)\\s-+\\(\\(?:if\\|unless\\|while\\|until\\)\\s-*.+\\)\\s-*$"))
       (if (not (re-search-forward regexp end t))
           (error "Error: Cannot get condition expression.")
         (let ((body (match-string-no-properties 1))
               (condition (match-string-no-properties 2))
+              (opening-block (splitjoin--opening-block close-type))
+              (closing-block (splitjoin--closing-block close-type))
               block-start)
           (delete-region start end)
           (setq block-start (point))
-          (insert condition "\n" body)
-          (when has-end
-            (insert "\nend"))
-          (indent-region block-start (point)))))))
+          (insert condition opening-block "\n" body)
+          (when closing-block
+            (insert (concat "\n" closing-block)))
+          (splitjoin--indent-block mode block-start (point) curindent))))))
 
 (defun splitjoin--to-block-condition (mode)
   (cl-case mode
-    (ruby-mode (splitjoin--to-block-condition-ruby t))
-    (coffee-mode (splitjoin--to-block-condition-ruby nil))))
+    (ruby-mode (splitjoin--to-block-condition-common mode 'end))
+    (coffee-mode (splitjoin--to-block-condition-common mode nil))))
 
 ;;;###autoload
 (defun splitjoin ()
