@@ -98,11 +98,23 @@
   (cl-case mode
     ((ruby-mode coffee-mode) (splitjoin--postfix-condition-ruby-p))))
 
-(defun splitjoin--retrieve-block-condition-ruby ()
+(defun splitjoin--beginning-of-block-p (mode)
+  (cl-case mode
+    ((ruby-mode coffee-mode)
+     (looking-at-p "\\=\\(?:if\\|unless\\|while\\|until\\)\\b"))))
+
+(defun splitjoin--beginning-of-block (mode)
+  (cl-case mode
+    (ruby-mode (ruby-beginning-of-block))
+    (coffee-mode
+     (forward-line -1)
+     (back-to-indentation))))
+
+(defun splitjoin--retrieve-block-condition-common (mode)
   (save-excursion
     (back-to-indentation)
-    (unless (looking-at-p "\\=\\(?:if\\|unless\\|while\\|until\\)\\b")
-      (ruby-beginning-of-block))
+    (unless (splitjoin--beginning-of-block-p mode)
+      (splitjoin--beginning-of-block mode))
     ;; TODO condition has multiple lines
     (let ((cond-start (point)))
       (goto-char (line-end-position))
@@ -111,32 +123,45 @@
 
 (defun splitjoin--retrieve-block-condition (mode)
   (cl-case mode
-    (ruby-mode (splitjoin--retrieve-block-condition-ruby))))
+    ((ruby-mode coffee-mode) (splitjoin--retrieve-block-condition-common mode))))
 
-(defun splitjoin--to-postfix-condition-ruby (condition)
+(defun splitjoin--end-of-block (mode)
+  (cl-case mode
+    (ruby-mode (ruby-end-of-block))
+    (coffee-mode
+     (forward-line -1)
+     (back-to-indentation))))
+
+(defun splitjoin--indent-postfix (mode &optional indent)
+  (cl-case mode
+    (ruby-mode (indent-for-tab-command))
+    (coffee-mode (indent-to indent))))
+
+(defun splitjoin--to-postfix-condition-common (mode condition)
   (save-excursion
-    (let (start end body)
+    (let (start end body start-indent)
       (back-to-indentation)
-      (unless (looking-at-p "\\=\\(?:if\\|unless\\|while\\|until\\)\\b")
-        (ruby-beginning-of-block))
-      (setq start (point))
+      (unless (splitjoin--beginning-of-block-p mode)
+        (splitjoin--beginning-of-block mode))
+      (setq start (point) start-indent (current-indentation))
       (forward-line 1)
       (back-to-indentation)
       (let ((body-start (point)))
         (goto-char (line-end-position))
         (delete-horizontal-space)
         (setq body (buffer-substring-no-properties body-start (point))))
-      (ruby-end-of-block)
+      (splitjoin--end-of-block mode)
       (skip-chars-forward "^ \t\r\n")
       (setq end (point))
       (delete-region start end)
       (insert body " " condition)
-      (indent-for-tab-command))))
+      (splitjoin--indent-postfix mode start-indent))))
 
 (defun splitjoin--to-postfix-condition (mode)
   (let ((condition (splitjoin--retrieve-block-condition mode)))
     (cl-case mode
-      (ruby-mode (splitjoin--to-postfix-condition-ruby condition)))))
+      ((ruby-mode coffee-mode)
+       (splitjoin--to-postfix-condition-common mode condition)))))
 
 (defun splitjoin--to-block-condition-ruby (has-end)
   (save-excursion
