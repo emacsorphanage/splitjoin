@@ -30,6 +30,7 @@
 ;; Suppress byte-compile warnings
 (declare-function ruby-beginning-of-block "ruby-mode")
 (declare-function ruby-end-of-block "ruby-mode")
+(declare-function coffee-indent-line "coffee-mode")
 
 (defconst splitjoin--supported-modes
   '(ruby-mode coffee-mode))
