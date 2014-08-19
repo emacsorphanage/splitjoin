@@ -41,6 +41,15 @@ console.log \"foo\" unless @a == 1
     (forward-cursor-on "console")
     (should (splitjoin--postfix-condition-p 'coffee-mode))))
 
+(ert-deftest coffee-postfix-condition-for-p ()
+  "`for' postfix condition."
+  (with-coffee-temp-buffer
+    "
+do_something food for food in ['apple', 'orange']
+"
+    (forward-cursor-on "food in")
+    (should (splitjoin--postfix-condition-p 'coffee-mode))))
+
 (ert-deftest coffee-postfix-condition-p-false-case ()
   "Invalid case of postfix condition"
   (with-coffee-temp-buffer
@@ -68,6 +77,16 @@ if true
    do_something
 "
     (forward-cursor-on "do_something")
+    (should (splitjoin--block-condition-p 'coffee-mode))))
+
+(ert-deftest coffee-block-condition-p-for ()
+  "`for' block condition."
+  (with-coffee-temp-buffer
+    "
+for name in ['taro', 'jiro']
+   console.log name
+"
+    (forward-cursor-on "jiro")
     (should (splitjoin--block-condition-p 'coffee-mode))))
 
 (ert-deftest coffee-block-condition-p-same-as-beginning-of-block ()
@@ -127,6 +146,21 @@ if true
       (forward-cursor-on "do_something")
       (call-interactively 'splitjoin)
       (should (string-match-p "^do_something if true" (buffer-string)))
+      (call-interactively 'splitjoin)
+      (should (string= orig-content (buffer-string))))))
+
+(ert-deftest coffee-splitjoin-block-for ()
+  "`for' block condition"
+  (with-coffee-temp-buffer
+    "
+for name in ['siro', 'goro']
+        do_something name
+"
+    (let ((orig-content (buffer-string)))
+      (forward-cursor-on "do_something")
+      (call-interactively 'splitjoin)
+      (should (string-match-p "^do_something name for name in \\['siro', 'goro'\\]"
+                              (buffer-string)))
       (call-interactively 'splitjoin)
       (should (string= orig-content (buffer-string))))))
 

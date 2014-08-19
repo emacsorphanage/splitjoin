@@ -62,7 +62,7 @@
 (defun splitjoin--block-condition-coffee-p ()
   (goto-char (line-beginning-position))
   (back-to-indentation)
-  (let ((block-start-re "\\=\\(?:if\\|unless\\|while\\|until\\)\\s-*.+$")
+  (let ((block-start-re "\\=\\(?:if\\|unless\\|while\\|until\\|for\\)\\s-*.+$")
         curindent)
     (unless (looking-at-p block-start-re)
       (setq curindent (current-indentation))
@@ -97,14 +97,22 @@
       (goto-char (line-end-position))
       (looking-back "\\(?:if\\|unless\\|while\\|until\\)\\s-+\\(.+\\)\\s-*\\="))))
 
+(defun splitjoin--postfix-condition-coffee-p ()
+  (save-excursion
+    (back-to-indentation)
+    (unless (looking-at-p "\\=\\(?:if\\|unless\\|while\\|until\\|for\\)")
+      (goto-char (line-end-position))
+      (looking-back "\\(?:if\\|unless\\|while\\|until\\|for\\)\\s-+\\(.+\\)\\s-*\\="))))
+
 (defun splitjoin--postfix-condition-p (mode)
   (cl-case mode
-    ((ruby-mode coffee-mode) (splitjoin--postfix-condition-ruby-p))))
+    (ruby-mode (splitjoin--postfix-condition-ruby-p))
+    (coffee-mode (splitjoin--postfix-condition-coffee-p))))
 
 (defun splitjoin--beginning-of-block-p (mode)
   (cl-case mode
-    ((ruby-mode coffee-mode)
-     (looking-at-p "\\=\\(?:if\\|unless\\|while\\|until\\)\\b"))))
+    (ruby-mode (looking-at-p "\\=\\(?:if\\|unless\\|while\\|until\\)\\b"))
+    (coffee-mode (looking-at-p "\\=\\(?:if\\|unless\\|while\\|until\\|for\\)\\b"))))
 
 (defun splitjoin--beginning-of-block (mode)
   (cl-case mode
@@ -185,6 +193,13 @@
      (indent-to block-indent)
      (coffee-indent-line))))
 
+(defsubst splitjoin--postfix-condition-regexp (mode)
+  (cl-case mode
+    (ruby-mode
+     "\\=\\(.+\\)\\s-+\\(\\(?:if\\|unless\\|while\\|until\\)\\s-*.+\\)\\s-*$")
+    (coffee-mode
+     "\\=\\(.+\\)\\s-+\\(\\(?:if\\|unless\\|while\\|until\\|for\\)\\s-*.+\\)\\s-*$")))
+
 (defun splitjoin--to-block-condition-common (mode close-type)
   (save-excursion
     (goto-char (line-beginning-position))
@@ -192,7 +207,7 @@
     (let ((start (point))
           (end (line-end-position))
           (curindent (current-indentation))
-          (regexp "\\=\\(.+\\)\\s-+\\(\\(?:if\\|unless\\|while\\|until\\)\\s-*.+\\)\\s-*$"))
+          (regexp (splitjoin--postfix-condition-regexp mode)))
       (if (not (re-search-forward regexp end t))
           (error "Error: Cannot get condition expression.")
         (let ((body (match-string-no-properties 1))
