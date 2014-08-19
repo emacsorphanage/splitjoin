@@ -11,6 +11,7 @@ Emacs port of [splitjoin.vim](https://github.com/AndrewRadev/splitjoin.vim).
 ## Support Modes
 
 - ruby-mode
+- coffee-mode
 
 
 ## Command
