@@ -25,7 +25,7 @@
 (require 'splitjoin)
 
 (ert-deftest ruby-postfix-condition-p ()
-  ""
+  "Simple postfix condition."
   (with-ruby-temp-buffer
     "
 do_something if false
@@ -34,7 +34,7 @@ do_something if false
     (should (splitjoin--postfix-condition-p 'ruby-mode))))
 
 (ert-deftest ruby-postfix-condition-p-false-case ()
-  ""
+  "Invalid case of postfix condition."
   (with-ruby-temp-buffer
     "
 if true
@@ -57,7 +57,7 @@ end
     (should-not (splitjoin--postfix-condition-p 'ruby-mode))))
 
 (ert-deftest ruby-block-condition-p-inside-block ()
-  ""
+  "Simple block condition."
   (with-ruby-temp-buffer
     "
 if true
@@ -68,7 +68,7 @@ end
     (should (splitjoin--block-condition-p 'ruby-mode))))
 
 (ert-deftest ruby-block-condition-p-same-as-beginning-of-block ()
-  ""
+  "Block condition check from beginning of block"
   (with-ruby-temp-buffer
     "
 if true
@@ -82,7 +82,7 @@ end
     (should (splitjoin--block-condition-p 'ruby-mode))))
 
 (ert-deftest ruby-block-condition-p-same-as-end-of-block ()
-  ""
+  "Block condition check from end of block"
   (with-ruby-temp-buffer
     "
 if true
@@ -96,7 +96,7 @@ end
     (should (splitjoin--block-condition-p 'ruby-mode))))
 
 (ert-deftest ruby-block-condition-p-has-more-than-one-line ()
-  ""
+  "Block has more than one statements."
   (with-ruby-temp-buffer
     "
 if true
@@ -108,7 +108,7 @@ end
     (should-not (splitjoin--block-condition-p 'ruby-mode))))
 
 (ert-deftest ruby-retrieve-condition-term ()
-  ""
+  "retrieve condition which is term."
   (with-ruby-temp-buffer
     "
 if true
@@ -120,7 +120,7 @@ end
       (should (string= got "if true")))))
 
 (ert-deftest ruby-retrieve-condition-expression ()
-  ""
+  "retrieve condition which is expression."
   (with-ruby-temp-buffer
     "
 unless  \t   @foo =~ /^HTTP/
@@ -132,7 +132,7 @@ end
       (should (string= got "unless  \t   @foo =~ /^HTTP/")))))
 
 (ert-deftest ruby-splitjoin-block ()
-  ""
+  "splitjoin for block condition."
   (with-ruby-temp-buffer
     "
 if true
@@ -147,7 +147,7 @@ end
       (should (string= orig-content (buffer-string))))))
 
 (ert-deftest ruby-splitjoin-block-nested ()
-  ""
+  "splitjoin for nested block"
   (with-ruby-temp-buffer
     "
 if true
@@ -164,7 +164,7 @@ end
       (should (string= orig-content (buffer-string))))))
 
 (ert-deftest ruby-splitjoin-postfix ()
-  ""
+  "splitjoin for postfix condition"
   (with-ruby-temp-buffer
     "
 do_something if true
@@ -177,7 +177,7 @@ do_something if true
       (should (string= orig-content (buffer-string))))))
 
 (ert-deftest ruby-splitjoin-postfix-nested ()
-  ""
+  "splitjoin for postfix condition in nested block"
   (with-ruby-temp-buffer
     "
 if true

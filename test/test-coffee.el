@@ -24,7 +24,7 @@
 (require 'ert)
 
 (ert-deftest coffee-postfix-condition-p ()
-  ""
+  "Simple postfix condition."
   (with-coffee-temp-buffer
     "
 do_something if false
@@ -33,7 +33,7 @@ do_something if false
     (should (splitjoin--postfix-condition-p 'coffee-mode))))
 
 (ert-deftest coffee-postfix-condition-p-member ()
-  ""
+  "Postfix with some special characters."
   (with-coffee-temp-buffer
     "
 console.log \"foo\" unless @a == 1
@@ -42,7 +42,7 @@ console.log \"foo\" unless @a == 1
     (should (splitjoin--postfix-condition-p 'coffee-mode))))
 
 (ert-deftest coffee-postfix-condition-p-false-case ()
-  ""
+  "Invalid case of postfix condition"
   (with-coffee-temp-buffer
     "
 if true
@@ -61,7 +61,7 @@ if true
     (should-not (splitjoin--postfix-condition-p 'coffee-mode))))
 
 (ert-deftest coffee-block-condition-p-inside-block ()
-  ""
+  "Valid case. Block condition."
   (with-coffee-temp-buffer
     "
 if true
@@ -84,7 +84,7 @@ if true
     (should (splitjoin--block-condition-p 'coffee-mode))))
 
 (ert-deftest coffee-block-condition-p-has-more-than-one-line ()
-  ""
+  "Invalid case. Block has more than one statements"
   (with-coffee-temp-buffer
     "
 if true
@@ -106,7 +106,7 @@ if true
       (should (string= got "if true")))))
 
 (ert-deftest coffee-retrieve-condition-expression ()
-  ""
+  "retrieve condition expression"
   (with-coffee-temp-buffer
     "
 unless  \t   @foo =~ /^HTTP/
@@ -117,7 +117,7 @@ unless  \t   @foo =~ /^HTTP/
       (should (string= got "unless  \t   @foo =~ /^HTTP/")))))
 
 (ert-deftest coffee-splitjoin-block ()
-  ""
+  "block condition"
   (with-coffee-temp-buffer
     "
 if true
@@ -131,7 +131,7 @@ if true
       (should (string= orig-content (buffer-string))))))
 
 (ert-deftest coffee-splitjoin-block-nested ()
-  ""
+  "block conditon in nested block"
   (with-coffee-temp-buffer
     "
 if true
@@ -146,7 +146,7 @@ if true
       (should (string= orig-content (buffer-string))))))
 
 (ert-deftest coffee-splitjoin-postfix ()
-  ""
+  "postfix condition"
   (with-coffee-temp-buffer
     "
 console.log \"foo\" unless @a == 1
@@ -159,7 +159,7 @@ console.log \"foo\" unless @a == 1
       (should (string= orig-content (buffer-string))))))
 
 (ert-deftest coffee-splitjoin-postfix-nested ()
-  ""
+  "postfix condition in block"
   (with-coffee-temp-buffer
     "
 if true
