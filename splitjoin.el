@@ -1,4 +1,4 @@
-;;; splitjoin.el --- splitjoin
+;;; splitjoin.el ---  Transition between multiline and single-line code
 
 ;; Copyright (C) 2015 by Syohei YOSHIDA
 
@@ -22,7 +22,10 @@
 
 ;;; Commentary:
 
-;; Emacs port of splitjoin.vim(https://github.com/AndrewRadev/splitjoin.vim).
+;; splitjoin.el is Emacs port of splitjoin.vim(https://github.com/AndrewRadev/splitjoin.vim).
+;; splitjoin provides command which translates between multiline and single
+;; line code, for example translation between block condition and postfix
+;; condition in ruby-mode.
 
 ;;; Code:
 
