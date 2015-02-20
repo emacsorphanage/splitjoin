@@ -20,7 +20,7 @@ Emacs port of [splitjoin.vim](https://github.com/AndrewRadev/splitjoin.vim).
 
 Transition between multiline and single-line code.
 
-[travis-badge]: https://travis-ci.org/syohex/emacs-splitjoin.png
+[travis-badge]: https://travis-ci.org/syohex/emacs-splitjoin.svg
 [travis-link]: https://travis-ci.org/syohex/emacs-splitjoin
 [melpa-link]: http://melpa.org/#/splitjoin
 [melpa-stable-link]: http://melpa.org/#/splitjoin
