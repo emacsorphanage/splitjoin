@@ -99,14 +99,14 @@
     (back-to-indentation)
     (unless (looking-at-p "\\=\\(?:if\\|unless\\|while\\|until\\)")
       (goto-char (line-end-position))
-      (looking-back "\\(?:if\\|unless\\|while\\|until\\)\\s-+\\(.+\\)\\s-*\\="))))
+      (looking-back "\\(?:if\\|unless\\|while\\|until\\)\\s-+\\(.+\\)\\s-*\\=" nil))))
 
 (defun splitjoin--postfix-condition-coffee-p ()
   (save-excursion
     (back-to-indentation)
     (unless (looking-at-p "\\=\\(?:if\\|unless\\|while\\|until\\|for\\)")
       (goto-char (line-end-position))
-      (looking-back "\\(?:if\\|unless\\|while\\|until\\|for\\)\\s-+\\(.+\\)\\s-*\\="))))
+      (looking-back "\\(?:if\\|unless\\|while\\|until\\|for\\)\\s-+\\(.+\\)\\s-*\\=" nil))))
 
 (defun splitjoin--postfix-condition-p (mode)
   (cl-case mode
